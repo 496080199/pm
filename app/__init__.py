@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_rbac import RBAC
 from flask_login import LoginManager,current_user
 
+import sys 
+reload(sys) 
+sys.setdefaultencoding('utf8') 
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -12,12 +15,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-rbac=RBAC()
-    
-
-
-rbac.set_user_loader(current_user)
-rbac.init_app(app)
 from app import views,models
 
 

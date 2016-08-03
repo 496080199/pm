@@ -1,0 +1,22 @@
+{% extends 'base_inner.html' %}
+{% block content %}
+<div class="row clearfix">
+		<div class="col-md-2 column">
+			<div class="panel panel-info">
+  <div class="panel-heading">人员管理</div>
+
+  <ul class="list-group">
+    <li class="list-group-item"><a href="/staff">员工</a></li>
+    <li class="list-group-item">老师</li>
+    <li class="list-group-item">学生</li>
+  </ul>
+  </div>
+  {% block panel %}{% endblock %}
+
+		</div>
+		<div class="col-md-8 column">
+		{% block info %}
+		{% endblock %}
+		</div>
+	</div>
+{% endblock %}

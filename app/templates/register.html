@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row clearfix">
+		<div class="col-md-4 column">
+		</div>
+		<div class="col-md-4 column">
+		<div align="center"><legend>注册</legend></div>
+			<form role="form" action="/register" method="post">
+			{{form.hidden_tag()}}
+				<div class="form-group">
+					 <label>用户名</label><br>
+					<input type="text" class="form-control" name="username"/>
+          {% for error in form.username.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>密码</label><br><input type="password" class="form-control" name="password"/>
+          {% for error in form.password.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>重复密码</label><br><input type="password" class="form-control" name="password2"/>
+          {% for error in form.password2.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>手机号码</label><br><input type="text" class="form-control" name="phone"/>
+          {% for error in form.phone.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+
+				 <button type="submit" class="btn btn-primary">提交</button>
+			</form>
+		</div>
+		<div class="col-md-4 column">
+		</div>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base_inner.html' %}
+
+
+
+
+{% block content %}
+<div class="panel panel-info">
+  <div class="panel-heading">用户信息</div>
+    <div>当前店铺：{% if current_user.shop_id %}{{current_user.shop.shopname}}(<a href="/editshop" >修改</a>）{% else %}无（<a href="/addshop" >创建</a>）{% endif %}</div>
+    <div>地址：{{ current_user.shop.province+current_user.shop.city+current_user.shop.area+current_user.shop.address }}</div>
+    <div>邮编：{{ current_user.shop.zipcode }}</div>
+    <div>联系电话：{{ current_user.shop.telphone}}</div>
+    <div>  您的身份：{% if current_user.role == 1 %}老板{% elif current_user.role == 2%}员工{% else %}无{% endif %}</div>
+  
+</div>
+<div class="panel panel-info">
+  <div class="panel-heading">人员详情</div>
+  <div>员工：5</div>
+  <div>老师：5</div>
+  <div>学生：5</div>
+</div>
+<div class="panel panel-info">
+  <div class="panel-heading">课程详情</div>
+  <div>钢琴：5</div>
+</div>
+<div class="panel panel-info">
+  <div class="panel-heading">物品详情</div>
+  <div>琴房：5</div>
+</div>
+<div class="panel panel-info">
+  <div class="panel-heading">财务详情</div>
+  <div>收入：1775</div>
+  <div>支出：345</div>
+</div>
+
+
+
+{% endblock %}
+
+{% block footer %}
+<div data-am-widget="navbar" class="am-navbar am-cf am-navbar-default "
+      id="">
+      <ul class="am-navbar-nav am-cf am-avg-sm-4">
+          <li >
+            <a href="#" class="">
+                  <span class="am-icon-user"></span>
+                <span class="am-navbar-label">员工</span>
+            </a>
+          </li>
+          <li data-am-navbar-share>
+            <a href="#" class="">
+                  <span class="am-icon-users"></span>
+                <span class="am-navbar-label">教师</span>
+            </a>
+          </li>
+          <li data-am-navbar-qrcode>
+            <a href="###" class="">
+                  <span class="am-icon-users"></span>
+                <span class="am-navbar-label">学生</span>
+            </a>
+          </li>
+          <li >
+            <a href="#" class="">
+                  <span class="am-icon-calendar-o"></span>
+                <span class="am-navbar-label">排课</span>
+            </a>
+          </li>
+          <li >
+            <a href="#" class="">
+                  <span class="am-icon-list"></span>
+                <span class="am-navbar-label">统计</span>
+            </a>
+          </li>
+          
+      </ul>
+  </div>
+{% endblock %}
