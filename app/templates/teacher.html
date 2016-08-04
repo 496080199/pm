@@ -1,0 +1,88 @@
+{% extends 'person_base.html' %}
+ {% block panel %}
+
+ <a href="/teacher_add" ><button class="btn btn-info">添加老师</button></a>
+ {% endblock %}
+{% block info %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+		<div class="alert alert-dismissible alert-success" role="alert">{{ message }}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<div><h4><b>老师</b></h4></div>
+<table class="table table-hover table-striped">
+				<thead>
+					<tr>
+						<th>
+							姓名
+						</th>
+						<th>
+							性别
+						</th>
+						<th>
+							手机号码
+						</th>
+						<th>
+							微信号
+						</th>
+						<th>
+							课程
+						</th>
+						<th>
+							收费
+						</th>
+						<th>
+							学历
+						</th>
+						<th>
+							相关证书
+						</th>
+						<th>
+							个人简介
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for teacher in teachers %}
+					<tr>
+						<td>
+							{{teacher.firstname}}{{teacher.lastname}}
+						</td>
+						<td>
+							{{teacher.sex}}
+						</td>
+						<td>
+						    {{teacher.phone}}
+						</td>
+						<td>
+							{{teacher.wx}}
+						</td>
+						<td>
+							{{teacher.course_id}}
+						</td>
+						<td>
+							{{teacher.fee}}
+						</td>
+						<td>
+						<a tabindex="0"  data-toggle="popover" data-trigger="focus" title="education"  data-template='<img src="/img/{{teacher.education}}" width="200" height="200"/>'>查看</a>
+						</td>
+						<td>
+							{{teacher.certificate}}
+						</td>
+						<td>
+							<a tabindex="0"  data-toggle="popover" data-trigger="focus" title="简介" data-content="{{teacher.resume}}">查看</a>
+						</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+{% endblock %}
+{% block js %}
+	<script>
+	$(function () 
+      { $("[data-toggle='popover']").popover();
+      });
+    </script>
+ {% endblock %}

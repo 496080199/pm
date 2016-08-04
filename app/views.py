@@ -147,5 +147,42 @@ def staff_add():
 @login_required
 def staff_password():
     pass
-    
-    
+
+@app.route('/teacher')
+@login_required
+def teacher():
+    teachers=Teacher.query.filter_by(shop_id=current_user.shop_id)
+    return render_template('teacher.html',teachers=teachers)
+
+@app.route('/teacher_add',methods=['GET','POST'])
+@login_required
+def teacher_add():
+    form=TeacherForm()
+    form.course_id.choices = [(g.id, g.name) for g in Course.query.all()]
+    if form.validate_on_submit():
+        teacher=Teacher()
+        teacher.firstname=form.firstname.data
+        teacher.lastname=form.lastname.data
+        teacher.sex=form.sex.data
+        teacher.phone=form.phone.data
+        teacher.wx=form.wx.data
+        teacher.course_id=form.course_id.data
+        teacher.fee=form.fee.data
+        
+        filename = 'teacher_education_'+str(randint(0,9))+str(randint(0,9))+str(randint(0,9))+secure_filename(form.education.data.filename)
+        form.education.data.save(app.config['IMG_PATH']+'/'+filename)
+        teacher.education=filename
+        
+        if form.certificate.data:
+            filename = 'teacher_certificate_'+str(randint(0,9))+str(randint(0,9))+str(randint(0,9))+secure_filename(form.certificate.data.filename)
+            form.certificate.data.save(app.config['IMG_PATH']+'/'+filename)
+            teacher.certificate=filename
+        
+        teacher.resume=form.resume.data
+        
+        teacher.shop_id=current_user.shop_id
+        db.session.add(teacher)
+        db.session.commit()
+        flash('老师添加成功')
+        return redirect('/teacher')
+    return render_template('teacher_add.html',form=form)
