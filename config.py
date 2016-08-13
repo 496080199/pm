@@ -6,3 +6,7 @@ UPLOAD_PATH='D:\workspace\upload'
 IMG_PATH='D:\workspace\upload'
 
 SECRET_KEY='DFmfidcwlhrrghgdvvjoverh'
+
+
+
+POSTS_PER_PAGE=10

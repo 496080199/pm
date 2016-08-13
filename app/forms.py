@@ -29,6 +29,12 @@ class StaffForm(Form):
     nickname=StringField('昵称',validators=[DataRequired(message='昵称必填')])
     password=PasswordField('密码',validators=[DataRequired(message='密码必填')])
     phone=StringField('手机号码',validators=[DataRequired(message='手机号码必填'),Length(min=11,max=11,message='请输入11位手机号'),Regexp('^(13[0-9]|14[0-9]|15[0-9]|18[0-9])',message='无效号码')])
+class StaffPasswordForm(Form):
+    password=PasswordField('密码',validators=[DataRequired(message='密码必填')])
+class StaffEditForm(Form):
+    nickname=StringField('昵称')
+    phone=StringField('手机号码')
+    
 class TeacherForm(Form):
     firstname=StringField('姓',validators=[DataRequired(message='姓必填')])
     lastname=StringField('名',validators=[DataRequired(message='名必填')])
@@ -37,7 +43,21 @@ class TeacherForm(Form):
     wx=StringField('微信号',validators=[DataRequired(message='微信号必填')])
     course_id=SelectField('课程',coerce=int,validators=[DataRequired(message='课程必填')])
     fee=IntegerField('收费',validators=[DataRequired(message='收费必填')])
-    education=FileField('学历',validators=[DataRequired(message='学历必填')])
+    education=FileField('学历')
     certificate=FileField('证书')
     resume=TextAreaField('个人简介',validators=[DataRequired(message='个人简介必填')])
+class StudentForm(Form):
+    firstname=StringField('姓',validators=[DataRequired(message='姓必填')])
+    lastname=StringField('名',validators=[DataRequired(message='名必填')])
+    sex=SelectField('性别',choices=[('男','男'),('女','女')],validators=[DataRequired(message='性别必填')])
+    course_id=SelectField('课程',coerce=int,validators=[DataRequired(message='课程必填')])
+    school=StringField('学校',validators=[DataRequired(message='学校必填')])
+    phone1=StringField('手机号')
+    province=StringField('省')
+    city=StringField('市')
+    area=StringField('区')
+    address=StringField('详细地址',validators=[DataRequired(message='详细地址必填')])
+    parent=StringField('家长',validators=[DataRequired(message='家长必填')])
+    phone2=StringField('家长手机号',validators=[DataRequired(message='家长手机号必填')])
+    
     

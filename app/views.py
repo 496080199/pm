@@ -1,14 +1,15 @@
 # coding: utf-8
 from app import app,db,login_manager
-from flask import g,render_template,flash,redirect,send_from_directory
+from flask import g,render_template,flash,redirect,send_from_directory,request
 from flask_login import login_user,logout_user,current_user,login_required
 from .forms import *
 from .models import *
 import hashlib
 from random import randint
 from werkzeug import secure_filename
+import flask_excel 
 
-
+POSTS_PER_PAGE=20
 
 @login_manager.user_loader
 def load_user(id):
@@ -143,22 +144,55 @@ def staff_add():
         flash('员工添加成功')
         return redirect('/staff')
     return render_template('staff_add.html',form=form)
-@app.route('/staff_password')
+@app.route('/staff_password/<int:id>',methods=['GET','POST'])
 @login_required
-def staff_password():
-    pass
+def staff_password(id):
+    staff=User.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    form=StaffPasswordForm()
+    if form.validate_on_submit():
+        staff.password_hash=hashlib.md5(form.password.data).hexdigest()
+        db.session.commit()
+        flash('员工密码修改成功')
+        return redirect('/staff')
+    return render_template('staff_password.html',form=form,staff=staff)
 
-@app.route('/teacher')
+@app.route('/staff_edit/<int:id>',methods=['GET','POST'])
 @login_required
-def teacher():
-    teachers=Teacher.query.filter_by(shop_id=current_user.shop_id)
-    return render_template('teacher.html',teachers=teachers)
+def staff_edit(id):
+    staff=User.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    form=StaffEditForm()
+    if form.validate_on_submit():
+        if form.nickname.data:
+            staff.nickname=form.nickname.data
+            db.session.commit()
+        if form.phone.data:
+            staff.phone=form.phone.data
+            db.session.commit()
+        flash('员工资料修改成功')
+        return redirect('/staff')
+    return render_template('staff_edit.html',form=form,staff=staff)
+@app.route('/staff_del/<int:id>')
+@login_required
+def staff_del(id):
+    staff=User.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    db.session.delete(staff)
+    db.session.commit()
+    flash('员工删除成功')
+    return redirect('/staff')
+
+@app.route('/teacher')    
+@app.route('/teacher/<int:page>')
+@login_required
+def teacher(page=1):
+    pagination=Teacher.query.filter_by(shop_id=current_user.shop_id).paginate(page,POSTS_PER_PAGE, False)
+    teachers=pagination.items
+    return render_template('teacher.html',teachers=teachers,pagination=pagination)
 
 @app.route('/teacher_add',methods=['GET','POST'])
 @login_required
 def teacher_add():
     form=TeacherForm()
-    form.course_id.choices = [(g.id, g.name) for g in Course.query.all()]
+    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
     if form.validate_on_submit():
         teacher=Teacher()
         teacher.firstname=form.firstname.data
@@ -186,3 +220,158 @@ def teacher_add():
         flash('老师添加成功')
         return redirect('/teacher')
     return render_template('teacher_add.html',form=form)
+@app.route('/teacher_edit/<int:id>',methods=['GET','POST'])
+@login_required
+def teacher_edit(id):
+    teacher=Teacher.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    form=TeacherForm()
+    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    if form.validate_on_submit():
+        teacher.firstname=form.firstname.data
+        teacher.lastname=form.lastname.data
+        teacher.sex=form.sex.data
+        teacher.phone=form.phone.data
+        teacher.wx=form.wx.data
+        teacher.course_id=form.course_id.data
+        teacher.fee=form.fee.data
+        
+        if form.education.data:
+            filename = 'teacher_education_'+str(randint(0,9))+str(randint(0,9))+str(randint(0,9))+secure_filename(form.education.data.filename)
+            form.education.data.save(app.config['IMG_PATH']+'/'+filename)
+            teacher.education=filename
+        
+        if form.certificate.data:
+            filename = 'teacher_certificate_'+str(randint(0,9))+str(randint(0,9))+str(randint(0,9))+secure_filename(form.certificate.data.filename)
+            form.certificate.data.save(app.config['IMG_PATH']+'/'+filename)
+            teacher.certificate=filename
+        
+        teacher.resume=form.resume.data
+        db.session.commit()
+        flash('老师资料修改成功')
+        return redirect('/teacher')
+    form.firstname.data=teacher.firstname
+    form.lastname.data=teacher.lastname
+    form.sex.data=teacher.sex
+    form.phone.data=teacher.phone
+    form.wx.data=teacher.wx
+    form.course_id.data=teacher.course_id
+    form.fee.data=teacher.fee
+    form.education.data=teacher.education
+    form.resume.data=teacher.resume
+    return render_template('teacher_edit.html',form=form,teacher=teacher)
+@app.route('/teacher_del/<int:id>')
+@login_required
+def teacher_del(id):
+    teacher=Teacher.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    db.session.delete(teacher)
+    db.session.commit()
+    flash('老师删除成功')
+    return redirect('/teacher')
+
+@app.route('/student')    
+@app.route('/student/<int:page>')
+@login_required
+def student(page=1):
+    pagination=Student.query.filter_by(shop_id=current_user.shop_id).paginate(page,POSTS_PER_PAGE, False)
+    students=pagination.items
+    return render_template('student.html',students=students,pagination=pagination)
+
+@app.route('/student_add',methods=['GET','POST'])
+@login_required
+def student_add():
+    form=StudentForm()
+    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    if form.validate_on_submit():
+        student=Student()
+        student.firstname=form.firstname.data
+        student.lastname=form.lastname.data
+        student.sex=form.sex.data
+        student.course_id=form.course_id.data
+        student.school=form.school.data
+        student.phone1=form.phone1.data
+        student.province=form.province.data
+        student.city=form.city.data
+        student.area=form.area.data
+        student.address=form.address.data
+        student.parent=form.parent.data
+        student.phone2=form.phone2.data
+        
+        
+        student.shop_id=current_user.shop_id
+        db.session.add(student)
+        db.session.commit()
+        flash('学生添加成功')
+        return redirect('/student')
+    return render_template('student_add.html',form=form)
+@app.route('/student_edit/<int:id>',methods=['GET','POST'])
+@login_required
+def student_edit(id):
+    student=Student.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    form=StudentForm()
+    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    if form.validate_on_submit():
+        student.firstname=form.firstname.data
+        student.lastname=form.lastname.data
+        student.sex=form.sex.data
+        student.course_id=form.course_id.data
+        student.school=form.school.data
+        student.phone1=form.phone1.data
+        student.province=form.province.data
+        student.city=form.city.data
+        student.area=form.area.data
+        student.address=form.address.data
+        student.parent=form.parent.data
+        student.phone2=form.phone2.data
+        db.session.commit()
+        flash('修改学生资料成功')
+        return redirect('/student')
+    form.firstname.data=student.firstname
+    form.lastname.data=student.lastname
+    form.sex.data=student.sex
+    form.course_id.data=student.course_id
+    form.school.data=student.school
+    form.phone1.data=student.phone1
+    form.province.data=student.province
+    form.city.data=student.city
+    form.area.data=student.area
+    form.address.data=student.address
+    form.parent.data=student.parent
+    form.phone2.data=student.phone2
+    return render_template('student_edit.html',form=form,student=student)
+@app.route('/student_del/<int:id>')
+@login_required
+def student_del(id):
+    student=Student.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
+    db.session.delete(student)
+    db.session.commit()
+    flash('删除学生成功')
+    return redirect('/student')
+@app.route("/student_import", methods=['GET', 'POST'])
+def student_import():
+    if request.method == 'POST':
+        def student_init_func(row):
+            #shop_id=Shop.query.filter_by(shopname=row['shop_id']).first()
+            student = Student()
+            student.firstname=row['firstname']
+            student.lastname=row['lastname']
+            student.school=row['school']
+            student.course_id=row['course_id']
+            student.sex=row['sex']
+            student.province=row['province']
+            student.city=row['city']
+            student.area=row['area']
+            student.address=row['address']
+            student.parent=row['parent']
+            student.phone1=row['phone1']
+            student.phone2=row['phone2']
+            student.shop_id=row['shop_id']
+            return student
+        
+        request.save_to_database(field_name='file', session=db.session,
+                                      table=Student,
+                                      initializer=student_init_func)
+        return redirect('/student')
+    return render_template('student_import.html')
+@app.route("/student_export", methods=['GET'])
+def student_export():
+    return flask_excel.make_response_from_tables(db.session, [Student], "xls")

@@ -1,0 +1,20 @@
+{% extends 'person_base.html' %}
+
+
+{% block info %}
+
+		<div align="center"><legend>上传学生信息表格</legend></div>
+			<form role="form" action="/student_import" method="post" enctype="multipart/form-data">
+				<div class="form-group">
+					 <label>表格</label><br>
+					<input type="file" name="file">
+         
+				</div>
+				
+				
+
+				 <button type="submit" class="btn btn-primary">提交</button>
+			</form>
+
+
+{% endblock %}

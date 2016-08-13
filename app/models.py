@@ -41,6 +41,13 @@ class Shop(db.Model):
     users = db.relationship('User', backref='shop',lazy='dynamic')
     teachers = db.relationship('Teacher', backref='shop',lazy='dynamic')
     students = db.relationship('Student', backref='shop',lazy='dynamic')
+class Course(db.Model):
+    __tablename__ = 'course'
+    id = db.Column(db.Integer, primary_key = True)
+    name=db.Column(db.String(30))
+    schedules = db.relationship('Schedule', backref='course',lazy='dynamic')
+    teachers = db.relationship('Teacher', backref='course',lazy='dynamic')
+    students = db.relationship('Student', backref='course',lazy='dynamic')
     
 class Teacher(db.Model):
     __tablename__ = 'teacher'
@@ -50,7 +57,7 @@ class Teacher(db.Model):
     sex=db.Column(db.String(10))
     phone=db.Column(db.String(15))
     wx=db.Column(db.String(15))
-    course_id=db.Column(db.Integer)
+    course_id=db.Column(db.Integer,db.ForeignKey('course.id'))
     fee=db.Column(db.Integer)
     education=db.Column(db.String(100))
     certificate=db.Column(db.String(100))
@@ -61,7 +68,7 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     firstname=db.Column(db.String(30))
     lastname=db.Column(db.String(30))
-    course_id=db.Column(db.Integer)
+    course_id=db.Column(db.Integer,db.ForeignKey('course.id'))
     sex=db.Column(db.String(10))
     school=db.Column(db.String(100))
     province=db.Column(db.String(100))
@@ -73,13 +80,7 @@ class Student(db.Model):
     phone2=db.Column(db.String(15))
     shop_id=db.Column(db.Integer,db.ForeignKey('shop.id'))
     
-class Course(db.Model):
-    __tablename__ = 'course'
-    id = db.Column(db.Integer, primary_key = True)
-    name=db.Column(db.String(30))
-    schedules = db.relationship('Schedule', backref='course',lazy='dynamic')
-    def __repr__(self):
-        return '<User %r>' % (self.name)
+
 class Schedule(db.Model):
     __tablename__ = 'schedule'
     id = db.Column(db.Integer, primary_key = True)

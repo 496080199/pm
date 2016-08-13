@@ -20,9 +20,9 @@
   <body {% block body %}{% endblock %}>
     
     <div class="container">
-	<div class="navbar navbar-default">
+	<div class="navbar">
 
-		<a class="navbar-brand" href="#">琴行管家</a>
+		<a class="navbar-brand" href="#"><h3><b>琴行管家</b></h3></a>
 		<ul class="nav navbar-nav navbar-right">
 		    <li><a href="/edituser" >欢迎！{{current_user.nickname}}。</a></li>
 		    <li><a href="#">修改密码</a></li>
@@ -33,15 +33,16 @@
 
 		{% block nav %}
 		<div>
-		<ul class="nav  nav-pills">
+		<ul class="nav nav-tabs">
 		    
-			<li><a href="/personmanage">人员管理</a></li>
-			<li><a href="#">课程管理</a></li>
-			<li><a href="#">物品管理</a></li>
-			<li><a href="#">财务管理</a></li>
-			<li><a href="/dash" class="active">用户中心</a></li>
+			<li {% block person %}{% endblock %}><a href="/personmanage">人员管理</a></li>
+			<li {% block course %}{% endblock %}><a href="#">课程管理</a></li>
+			<li {% block goods %}{% endblock %}><a href="#">物品管理</a></li>
+			<li {% block finance %}{% endblock %}><a href="#">财务管理</a></li>
+			<li {% block dash %}{% endblock %}><a href="/dash" class="active">用户中心</a></li>
 			
 		</ul>
+		<br>
 		
 		{% endblock %}
     {% block content %}{% endblock %}

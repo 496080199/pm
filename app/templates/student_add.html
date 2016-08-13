@@ -1,0 +1,92 @@
+{% extends 'person_base.html' %}
+{% block js %}
+<script src="{{url_for('static',filename='js/jsAddress.js')}}"></script>
+{% endblock %}
+{% block body %}
+onload="addressInit('cmbProvince', 'cmbCity', 'cmbArea', {% if form.province.data %}'{{form.province.data}}'{%else%}'北京'{%endif%}, {% if form.city.data %}'{{form.city.data}}'{%else%}'市辖区'{% endif %}, {% if form.area.data %}'{{form.area.data}}'{%else%}'东城区'{%endif%});"
+{% endblock %}
+
+{% block info %}
+
+		<div align="center"><legend>添加学生</legend></div>
+			<form role="form" action="/student_add" method="post" enctype="multipart/form-data">
+			{{form.hidden_tag()}}
+				<div class="form-group">
+					 <label>姓</label><br>
+					{{form.firstname}}
+          {% for error in form.firstname.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>名</label><br>
+					{{form.lastname}}
+          {% for error in form.lastname.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				
+				<div class="form-group">
+					 <label>性别</label><br>
+					{{form.sex}}
+          {% for error in form.sex.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>课程</label><br>
+					{{form.course_id}}
+          {% for error in form.course_id.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>学校</label><br>
+					{{form.school}}
+          {% for error in form.school.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				<div class="form-group">
+					 <label>手机号码</label><br>
+					{{form.phone1}}
+          {% for error in form.phone1.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				 <label for="doc-ipt-province-1">省</label>
+      				<select id="cmbProvince" name="province"></select>
+    				<label for="doc-ipt-city-1">市</label>
+      				<select id="cmbCity" name="city"></select>
+    				<label for="doc-ipt-area-1">区/县</label>
+      				<select id="cmbArea" name="area"></select>
+    	<div class="form-group">
+    		 <label>详细地址</label>
+      			{{form.address}}
+          		{% for error in form.address.errors %}
+          		<br> <span style="color: red;">[{{ error }}]</span>
+          		{% endfor %}
+    			</div>
+				<div class="form-group">
+					 <label>家长</label><br>
+					{{form.parent}}
+          {% for error in form.parent.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				
+				<div class="form-group">
+					 <label>家长手机号</label><br>
+					{{form.phone2}}
+          {% for error in form.phone2.errors %}
+           <br> <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+				</div>
+				
+				
+
+				 <button type="submit" class="btn btn-primary">提交</button>
+			</form>
+
+
+{% endblock %}
