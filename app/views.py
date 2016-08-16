@@ -192,7 +192,7 @@ def teacher(page=1):
 @login_required
 def teacher_add():
     form=TeacherForm()
-    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
     if form.validate_on_submit():
         teacher=Teacher()
         teacher.firstname=form.firstname.data
@@ -200,7 +200,7 @@ def teacher_add():
         teacher.sex=form.sex.data
         teacher.phone=form.phone.data
         teacher.wx=form.wx.data
-        teacher.course_id=form.course_id.data
+        teacher.course=form.course.data
         teacher.fee=form.fee.data
         
         filename = 'teacher_education_'+str(randint(0,9))+str(randint(0,9))+str(randint(0,9))+secure_filename(form.education.data.filename)
@@ -225,14 +225,14 @@ def teacher_add():
 def teacher_edit(id):
     teacher=Teacher.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
     form=TeacherForm()
-    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
     if form.validate_on_submit():
         teacher.firstname=form.firstname.data
         teacher.lastname=form.lastname.data
         teacher.sex=form.sex.data
         teacher.phone=form.phone.data
         teacher.wx=form.wx.data
-        teacher.course_id=form.course_id.data
+        teacher.course=form.course.data
         teacher.fee=form.fee.data
         
         if form.education.data:
@@ -254,7 +254,7 @@ def teacher_edit(id):
     form.sex.data=teacher.sex
     form.phone.data=teacher.phone
     form.wx.data=teacher.wx
-    form.course_id.data=teacher.course_id
+    form.course.data=teacher.course
     form.fee.data=teacher.fee
     form.education.data=teacher.education
     form.resume.data=teacher.resume
@@ -280,13 +280,13 @@ def student(page=1):
 @login_required
 def student_add():
     form=StudentForm()
-    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
     if form.validate_on_submit():
         student=Student()
         student.firstname=form.firstname.data
         student.lastname=form.lastname.data
         student.sex=form.sex.data
-        student.course_id=form.course_id.data
+        student.course=form.course.data
         student.school=form.school.data
         student.phone1=form.phone1.data
         student.province=form.province.data
@@ -308,12 +308,12 @@ def student_add():
 def student_edit(id):
     student=Student.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
     form=StudentForm()
-    form.course_id.choices = [(course.id, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
     if form.validate_on_submit():
         student.firstname=form.firstname.data
         student.lastname=form.lastname.data
         student.sex=form.sex.data
-        student.course_id=form.course_id.data
+        student.course=form.course.data
         student.school=form.school.data
         student.phone1=form.phone1.data
         student.province=form.province.data
@@ -328,7 +328,7 @@ def student_edit(id):
     form.firstname.data=student.firstname
     form.lastname.data=student.lastname
     form.sex.data=student.sex
-    form.course_id.data=student.course_id
+    form.course.data=student.course
     form.school.data=student.school
     form.phone1.data=student.phone1
     form.province.data=student.province
@@ -355,7 +355,7 @@ def student_import():
             student.firstname=row['firstname']
             student.lastname=row['lastname']
             student.school=row['school']
-            student.course_id=row['course_id']
+            student.course=row['course']
             student.sex=row['sex']
             student.province=row['province']
             student.city=row['city']
@@ -364,7 +364,7 @@ def student_import():
             student.parent=row['parent']
             student.phone1=row['phone1']
             student.phone2=row['phone2']
-            student.shop_id=row['shop_id']
+            student.shop_id=current_user.shop_id
             return student
         
         request.save_to_database(field_name='file', session=db.session,
@@ -374,4 +374,7 @@ def student_import():
     return render_template('student_import.html')
 @app.route("/student_export", methods=['GET'])
 def student_export():
-    return flask_excel.make_response_from_tables(db.session, [Student], "xls")
+    students=Student.query.filter_by(shop_id=current_user.shop_id)
+    
+    column_names = ['firstname', 'lastname','course','sex','phone1','school','province','city','area','address','parent','phone2']
+    return flask_excel.make_response_from_query_sets(students,column_names, "xls")

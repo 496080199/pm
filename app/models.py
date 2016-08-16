@@ -46,8 +46,6 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name=db.Column(db.String(30))
     schedules = db.relationship('Schedule', backref='course',lazy='dynamic')
-    teachers = db.relationship('Teacher', backref='course',lazy='dynamic')
-    students = db.relationship('Student', backref='course',lazy='dynamic')
     
 class Teacher(db.Model):
     __tablename__ = 'teacher'
@@ -57,7 +55,7 @@ class Teacher(db.Model):
     sex=db.Column(db.String(10))
     phone=db.Column(db.String(15))
     wx=db.Column(db.String(15))
-    course_id=db.Column(db.Integer,db.ForeignKey('course.id'))
+    course=db.Column(db.String(30))
     fee=db.Column(db.Integer)
     education=db.Column(db.String(100))
     certificate=db.Column(db.String(100))
@@ -68,7 +66,7 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     firstname=db.Column(db.String(30))
     lastname=db.Column(db.String(30))
-    course_id=db.Column(db.Integer,db.ForeignKey('course.id'))
+    course=db.Column(db.String(30))
     sex=db.Column(db.String(10))
     school=db.Column(db.String(100))
     province=db.Column(db.String(100))
