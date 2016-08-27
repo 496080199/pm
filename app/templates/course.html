@@ -1,0 +1,56 @@
+{% extends 'course_base.html' %}
+ {% block panel %}
+
+ <a href="/course_add" ><button class="btn btn-info">添加课程</button></a>
+
+ {% endblock %}
+{% block info %}
+
+<div><h4><b>课程</b></h4></div>
+<table class="table table-hover table-striped">
+				<thead>
+					<tr>
+						<th>
+							课程名称
+						</th>
+						
+						<th>
+							操作
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for course in courses %}
+					<tr>
+						<td>
+							{{course.name}}
+						</td>
+						
+						<td>
+							<a href="/course_edit/{{course.id}}">修改</a>&nbsp;&nbsp;<a href="/course_del/{{course.id}}" onclick="javascript:if(confirm('确定删除?')==false)return false;">删除</a>
+						</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<div class="pagination"> 
+			<ul class="pagination">
+				<li>
+				 {% if pagination.has_prev %} 
+                		<a href="/course/{{ pagination.prev_num }}">上一页</a> 
+                 {% endif %} 
+				</li>
+				
+				<li>
+					 <a href="">当前页：{{ pagination.page }}</a>
+				</li>
+				<li>
+					  {% if pagination.has_next %} 
+                		<a href="/course/{{ pagination.next_num }}">下一页</a> 
+            		  {% endif %} 
+				</li>
+			</ul>
+    
+			</div>
+
+{% endblock %}

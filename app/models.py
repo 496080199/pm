@@ -1,9 +1,25 @@
 # coding: utf-8
 from app import app,db
-from flask_login import UserMixin
+from flask import g
+from flask_login import current_user
 
-class User(UserMixin,db.Model):
-    __tablename__ = 'user'
+
+
+class Role(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))
+    
+    
+users_roles = db.Table(
+    'users_roles',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+)
+
+
+class User(db.Model):
+
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
@@ -11,9 +27,9 @@ class User(UserMixin,db.Model):
     
     nickname=db.Column(db.String(50),default='未设置的昵称')
     img=db.Column(db.String(100),default='default.jpg')
+    owner=db.Column(db.Integer,default=0)
     
     shop_id=db.Column(db.Integer,db.ForeignKey('shop.id'))
-    role=db.Column(db.Integer,default=0)
     def is_authenticated(self):
         return True
  
@@ -26,8 +42,28 @@ class User(UserMixin,db.Model):
     def get_id(self):
         return unicode(self.id)
  
-    def __repr__(self):
-        return '<User %r>' % (self.name)
+
+    
+    roles = db.relationship(
+        'Role',
+        secondary=users_roles,
+        backref=db.backref('roles', lazy='dynamic')
+    )
+
+    def add_role(self, role):
+        self.roles.append(role)
+
+    def add_roles(self, roles):
+        for role in roles:
+            self.add_role(role)
+
+    def get_roles(self):
+        for role in self.roles:
+            yield role
+
+
+
+
 class Shop(db.Model):
     __tablename__ = 'shop'
     id = db.Column(db.Integer, primary_key = True)
@@ -41,10 +77,12 @@ class Shop(db.Model):
     users = db.relationship('User', backref='shop',lazy='dynamic')
     teachers = db.relationship('Teacher', backref='shop',lazy='dynamic')
     students = db.relationship('Student', backref='shop',lazy='dynamic')
+    courses = db.relationship('Course', backref='shop',lazy='dynamic')
 class Course(db.Model):
     __tablename__ = 'course'
     id = db.Column(db.Integer, primary_key = True)
     name=db.Column(db.String(30))
+    shop_id=db.Column(db.Integer,db.ForeignKey('shop.id'))
     schedules = db.relationship('Schedule', backref='course',lazy='dynamic')
     
 class Teacher(db.Model):

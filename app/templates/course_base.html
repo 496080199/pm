@@ -1,0 +1,31 @@
+{% extends 'base_inner.html' %}
+{% block course %}class="active"{% endblock %}
+{% block content %}
+<div class="row clearfix">
+		<div class="col-md-2 column">
+			<div class="panel panel-info">
+  <div class="panel-heading">课程管理</div>
+
+  <ul class="list-group">
+    <li class="list-group-item"><a href="/course">课程分类</a></li>
+    <li class="list-group-item"><a href="">课程安排</a></li>
+  </ul>
+  </div>
+  {% block panel %}{% endblock %}
+
+		</div>
+		<div class="col-md-8 column">
+		{% block message %}
+		{% with messages = get_flashed_messages() %}
+  			{% if messages %}
+    			{% for message in messages %}
+					<div class="alert alert-dismissible alert-success" role="alert">{{ message }}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+    			{% endfor %}
+  			{% endif %}
+		{% endwith %}
+		{% endblock %}
+		{% block info %}
+		{% endblock %}
+		</div>
+	</div>
+{% endblock %}

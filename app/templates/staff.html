@@ -27,6 +27,11 @@
 				</thead>
 				<tbody>
 				{% for staff in staffs %}
+					{% for role in staff.roles %}
+					       {% if role.name == '老板' %}
+					       {% set role_type =1 %}
+					       {% endif %}
+					{% endfor %}
 					<tr>
 						<td>
 							{{staff.username}}
@@ -35,7 +40,7 @@
 							{{staff.nickname}}
 						</td>
 						<td>
-						    (<a href="/staff_password/{{staff.id}}">重置密码</a>)
+						    ({% if role_type== 1 %}老板密码无法重置{% else %}<a href="/staff_password/{{staff.id}}">重置密码</a>{% endif %})
 						</td>
 						<td>
 							{{staff.phone}}

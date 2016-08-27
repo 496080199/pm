@@ -10,7 +10,7 @@
     <div>地址：{{ current_user.shop.province+current_user.shop.city+current_user.shop.area+current_user.shop.address }}</div>
     <div>邮编：{{ current_user.shop.zipcode }}</div>
     <div>联系电话：{{ current_user.shop.telphone}}</div>
-    <div>  您的身份：{% if current_user.role == 1 %}老板{% elif current_user.role == 2%}员工{% else %}无{% endif %}</div>
+    <div>  您的身份：{% for role in current_user.roles %}{{role.name}}{% endfor %}</div>
   
 </div>
 <div class="panel panel-info">

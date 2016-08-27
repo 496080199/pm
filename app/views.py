@@ -1,6 +1,6 @@
 # coding: utf-8
 from app import app,db,login_manager
-from flask import g,render_template,flash,redirect,send_from_directory,request
+from flask import current_app,g,render_template,flash,redirect,send_from_directory,request,session
 from flask_login import login_user,logout_user,current_user,login_required
 from .forms import *
 from .models import *
@@ -8,6 +8,8 @@ import hashlib
 from random import randint
 from werkzeug import secure_filename
 import flask_excel 
+from flask_principal import Principal, Identity, AnonymousIdentity,identity_changed,identity_loaded, RoleNeed, UserNeed,Permission
+
 
 POSTS_PER_PAGE=20
 
@@ -17,14 +19,30 @@ def load_user(id):
 @login_manager.unauthorized_handler
 def unauthorized():
     return redirect('/login')
-@app.before_request
-def before_request():
-    g.user = current_user
+
+
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    # Set the identity user object
+    identity.user = current_user
+
+    # Add the UserNeed to the identity
+    if hasattr(current_user, 'id'):
+        identity.provides.add(UserNeed(current_user.id))
+
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+    if hasattr(current_user, 'roles'):
+        for role in current_user.roles:
+            identity.provides.add(RoleNeed(role.name))
+
+boss_permission = Permission(RoleNeed(u'老板'))
 
 
 
 
 @app.route('/')
+
 def index():
     return render_template('index.html')
 
@@ -34,10 +52,12 @@ def register():
         return redirect('/dash')
     form=RegisterForm()
     if form.validate_on_submit():
-        user=User()
+        boss = Role('boss') 
+        user=User(roles=[boss])
         user.username=form.username.data
         user.password_hash=hashlib.md5(form.password.data).hexdigest()
         user.phone=form.phone.data
+        user.owner=1
         db.session.add(user)
         db.session.commit()
         flash('注册成功')
@@ -52,6 +72,8 @@ def login():
         user=User.query.filter_by(username=form.username.data).first()
         if user and hashlib.md5(form.password.data).hexdigest()== user.password_hash:
             login_user(user)
+            identity_changed.send(current_app._get_current_object(),
+                                  identity=Identity(user.id))
             return redirect('/dash')
     return render_template('login.html',form=form)
 @app.route("/edituser",methods=['GET','POST'])
@@ -77,10 +99,18 @@ def uploaded_img(filename):
 @login_required
 def logout():
     logout_user()
+    # Remove session keys set by Flask-Principal
+    for key in ('identity.name', 'identity.auth_type'):
+        session.pop(key, None)
+
+    # Tell Flask-Principal the user is anonymous
+    identity_changed.send(current_app._get_current_object(),
+                          identity=AnonymousIdentity())
     return redirect('/')
 
 @app.route('/dash')
 @login_required
+@boss_permission.require()
 def dash():
     return render_template('dash.html')
 @app.route('/addshop',methods=['GET','POST'])
@@ -130,7 +160,7 @@ def personmanage():
 @app.route('/staff')
 @login_required
 def staff():
-    staffs=User.query.filter_by(shop_id=current_user.shop_id).filter_by(role=2)
+    staffs=User.query.filter_by(owner=0).filter_by(shop_id=current_user.shop_id)
     return render_template('staff.html',staffs=staffs)
 
 @app.route('/staff_add',methods=['GET','POST'])
@@ -192,7 +222,7 @@ def teacher(page=1):
 @login_required
 def teacher_add():
     form=TeacherForm()
-    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.filter_by(shop_id=current_user.shop_id)]
     if form.validate_on_submit():
         teacher=Teacher()
         teacher.firstname=form.firstname.data
@@ -225,7 +255,7 @@ def teacher_add():
 def teacher_edit(id):
     teacher=Teacher.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
     form=TeacherForm()
-    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.filter_by(shop_id=current_user.shop_id)]
     if form.validate_on_submit():
         teacher.firstname=form.firstname.data
         teacher.lastname=form.lastname.data
@@ -268,6 +298,34 @@ def teacher_del(id):
     flash('老师删除成功')
     return redirect('/teacher')
 
+@app.route("/teacher_import", methods=['GET', 'POST'])
+def teacher_import():
+    if request.method == 'POST':
+        def teacher_init_func(row):
+            teacher = Teacher()
+            teacher.firstname=row['firstname']
+            teacher.lastname=row['lastname']
+            teacher.fee=row['fee']
+            teacher.course=row['course']
+            teacher.sex=row['sex']
+            teacher.resume=row['resume']
+            teacher.phone=row['phone']
+            teacher.wx=row['wx']
+            teacher.shop_id=current_user.shop_id
+            return teacher
+        
+        request.save_to_database(field_name='file', session=db.session,
+                                      table=Teacher,
+                                      initializer=teacer_init_func)
+        return redirect('/teacher')
+    return render_template('teacher_import.html')
+@app.route("/teacher_export", methods=['GET'])
+def teacher_export():
+    teachers=Teacher.query.filter_by(shop_id=current_user.shop_id)
+    
+    column_names = ['firstname', 'lastname','sex','phone','wx','course','fee','resume']
+    return flask_excel.make_response_from_query_sets(teachers,column_names, "xls")
+
 @app.route('/student')    
 @app.route('/student/<int:page>')
 @login_required
@@ -280,7 +338,7 @@ def student(page=1):
 @login_required
 def student_add():
     form=StudentForm()
-    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.filter_by(shop_id=current_user.shop_id)]
     if form.validate_on_submit():
         student=Student()
         student.firstname=form.firstname.data
@@ -308,7 +366,7 @@ def student_add():
 def student_edit(id):
     student=Student.query.filter_by(shop_id=current_user.shop_id).filter_by(id=id).first()
     form=StudentForm()
-    form.course.choices = [(course.name, course.name) for course in Course.query.all()]
+    form.course.choices = [(course.name, course.name) for course in Course.query.filter_by(shop_id=current_user.shop_id)]
     if form.validate_on_submit():
         student.firstname=form.firstname.data
         student.lastname=form.lastname.data
@@ -378,3 +436,19 @@ def student_export():
     
     column_names = ['firstname', 'lastname','course','sex','phone1','school','province','city','area','address','parent','phone2']
     return flask_excel.make_response_from_query_sets(students,column_names, "xls")
+
+
+
+@app.route('/coursemanage')
+@login_required
+def coursemanage():
+    return redirect('/course')
+
+
+@app.route('/course')    
+@app.route('/course/<int:page>')
+@login_required
+def course(page=1):
+    pagination=Course.query.filter_by(shop_id=current_user.shop_id).paginate(page,POSTS_PER_PAGE, False)
+    courses=pagination.items
+    return render_template('course.html',courses=courses,pagination=pagination)

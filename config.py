@@ -10,3 +10,6 @@ SECRET_KEY='DFmfidcwlhrrghgdvvjoverh'
 
 
 POSTS_PER_PAGE=10
+
+
+RBAC_USE_WHITE= True

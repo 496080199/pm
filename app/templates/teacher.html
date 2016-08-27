@@ -2,6 +2,7 @@
  {% block panel %}
 
  <a href="/teacher_add" ><button class="btn btn-info">添加老师</button></a>
+ <a href="/teacher_import" ><button class="btn btn-info">批量添加老师</button></a>
  {% endblock %}
 {% block info %}
 
@@ -96,6 +97,9 @@
 				</li>
 			</ul>
     
+			</div>
+			<div>
+			<a href="/teacher_export" ><button class="btn btn-info">导出老师信息</button></a>
 			</div>
 {% endblock %}
 {% block js %}
